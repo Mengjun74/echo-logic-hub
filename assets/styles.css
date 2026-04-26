@@ -1,0 +1,420 @@
+/* ═══════════════════════════════════════════════════════════════
+   Echo-Logic Hub — Custom Theme
+   Professional dark industrial aesthetic
+   ═══════════════════════════════════════════════════════════════ */
+
+/* --- Google Font Import --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* --- CSS Custom Properties --- */
+:root {
+    --bg-primary: #06060b;
+    --bg-secondary: #0c0c14;
+    --bg-card: #10101a;
+    --bg-card-hover: #14142a;
+    --bg-surface: #1a1a2e;
+
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+
+    --accent-indigo: #6366f1;
+    --accent-violet: #8b5cf6;
+    --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+
+    --speaker-01: #3b82f6;
+    --speaker-02: #10b981;
+    --speaker-03: #f59e0b;
+    --speaker-04: #f43f5e;
+
+    --border-subtle: rgba(255, 255, 255, 0.06);
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.4);
+    --shadow-card-hover: 0 4px 16px rgba(99, 102, 241, 0.15);
+
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- Global Overrides --- */
+.stApp {
+    background-color: var(--bg-primary) !important;
+    font-family: var(--font-sans) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Hide Streamlit chrome */
+#MainMenu { visibility: hidden; }
+footer { visibility: hidden; }
+header { visibility: hidden; }
+
+/* --- Sidebar Styling --- */
+section[data-testid="stSidebar"] {
+    background-color: var(--bg-secondary) !important;
+    border-right: 1px solid var(--border-subtle) !important;
+}
+
+section[data-testid="stSidebar"] .stMarkdown h1 {
+    font-family: var(--font-sans) !important;
+    font-weight: 700 !important;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 1.5rem !important;
+    letter-spacing: -0.02em;
+}
+
+/* --- Custom Scrollbar --- */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.3);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.5);
+}
+
+/* --- Speech Card --- */
+.speech-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 14px 16px 14px 20px;
+    margin-bottom: 8px;
+    position: relative;
+    transition: all var(--transition-base);
+    cursor: default;
+}
+
+.speech-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    border-radius: var(--radius-md) 0 0 var(--radius-md);
+    transition: opacity var(--transition-fast);
+}
+
+.speech-card.speaker-01::before { background: var(--speaker-01); }
+.speech-card.speaker-02::before { background: var(--speaker-02); }
+.speech-card.speaker-03::before { background: var(--speaker-03); }
+.speech-card.speaker-04::before { background: var(--speaker-04); }
+
+.speech-card:hover {
+    background: var(--bg-card-hover);
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-1px);
+}
+
+.speech-card-selected {
+    border-color: rgba(99, 102, 241, 0.3) !important;
+    background: rgba(99, 102, 241, 0.05) !important;
+}
+
+.speech-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.speaker-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 10px;
+    border-radius: 100px;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.speaker-badge.speaker-01 {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--speaker-01);
+}
+.speaker-badge.speaker-02 {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--speaker-02);
+}
+.speaker-badge.speaker-03 {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--speaker-03);
+}
+.speaker-badge.speaker-04 {
+    background: rgba(244, 63, 94, 0.15);
+    color: var(--speaker-04);
+}
+
+.speech-timestamp {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    letter-spacing: 0.03em;
+}
+
+.speech-text {
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+/* --- Panel Headers --- */
+.panel-header {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.panel-header-icon {
+    font-size: 1.2rem;
+}
+
+/* --- Streaming Status Indicator --- */
+.status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+}
+
+.status-dot.active {
+    background: #10b981;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+    animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+.status-dot.inactive {
+    background: var(--text-muted);
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; box-shadow: 0 0 8px rgba(16, 185, 129, 0.6); }
+    50% { opacity: 0.5; box-shadow: 0 0 16px rgba(16, 185, 129, 0.3); }
+}
+
+/* --- Execute Button --- */
+.execute-btn-container .stButton > button {
+    width: 100% !important;
+    background: var(--accent-gradient) !important;
+    background-color: transparent !important;
+    color: white !important;
+    border: none !important;
+    border-radius: var(--radius-md) !important;
+    padding: 12px 24px !important;
+    font-family: var(--font-sans) !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    letter-spacing: 0.02em !important;
+    transition: all var(--transition-base) !important;
+    box-shadow: 0 2px 12px rgba(99, 102, 241, 0.3) !important;
+}
+
+.execute-btn-container .stButton > button:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.45) !important;
+}
+
+.execute-btn-container .stButton > button:disabled {
+    background: linear-gradient(135deg, #374151 0%, #4b5563 100%) !important;
+    box-shadow: none !important;
+    cursor: not-allowed !important;
+    opacity: 0.5 !important;
+}
+
+/* --- Chat History --- */
+.chat-entry {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.chat-entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.chat-entry-meta {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.chat-entry-content {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--text-primary);
+}
+
+/* --- System Prompt Area --- */
+.system-prompt-container textarea {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--text-primary) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 0.85rem !important;
+    padding: 12px !important;
+    transition: border-color var(--transition-fast) !important;
+}
+
+.system-prompt-container textarea:focus {
+    border-color: var(--accent-indigo) !important;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15) !important;
+}
+
+/* --- Streamlit Widget Overrides --- */
+.stCheckbox label {
+    color: var(--text-primary) !important;
+    font-size: 0.85rem !important;
+}
+
+.stCheckbox label span[data-testid="stCheckboxLabel"] {
+    font-family: var(--font-sans) !important;
+}
+
+/* Expander styling */
+.streamlit-expanderHeader {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: var(--radius-sm) !important;
+    color: var(--text-secondary) !important;
+    font-size: 0.82rem !important;
+}
+
+/* Text input overrides */
+.stTextArea textarea {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-subtle) !important;
+}
+
+/* Metric overrides */
+div[data-testid="stMetric"] {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+}
+
+div[data-testid="stMetric"] label {
+    color: var(--text-secondary) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 0.72rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+}
+
+div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
+    color: var(--text-primary) !important;
+    font-family: var(--font-sans) !important;
+    font-weight: 600 !important;
+}
+
+/* --- Segment Count Badge --- */
+.segment-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 8px;
+    border-radius: 100px;
+    background: rgba(99, 102, 241, 0.15);
+    color: var(--accent-indigo);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* --- Divider --- */
+.section-divider {
+    border: none;
+    border-top: 1px solid var(--border-subtle);
+    margin: 16px 0;
+}
+
+/* --- Empty State --- */
+.empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--text-muted);
+}
+
+.empty-state-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+.empty-state-text {
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* --- Global Button Overrides --- */
+.stButton > button {
+    color: #000000 !important;
+    background-color: #f1f5f9 !important;
+    border: 1px solid rgba(0,0,0,0.1) !important;
+    transition: all var(--transition-fast) !important;
+}
+
+.stButton > button:hover {
+    background-color: #e2e8f0 !important;
+    transform: translateY(-1px) !important;
+}
+
+.stButton > button:active {
+    background-color: #cbd5e1 !important;
+    transform: translateY(1px) !important;
+}
+
+/* --- Sidebar Button Overrides --- */
+section[data-testid="stSidebar"] .stButton > button {
+    width: 100% !important;
+    border-radius: var(--radius-md) !important;
+    font-family: var(--font-sans) !important;
+    font-weight: 600 !important;
+}
+
+/* --- Toast / Notification --- */
+.stToast {
+    background: var(--bg-surface) !important;
+    border: 1px solid var(--border-subtle) !important;
+    color: var(--text-primary) !important;
+}
