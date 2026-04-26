@@ -1,7 +1,7 @@
 # Echo-Logic Hub — Setup Guide
 
 > **Real-time Speech-to-Text + LLM Orchestration Dashboard**
-> NVIDIA Parakeet ASR · Sortformer Diarization · Google Gemini · Streamlit
+> faster-whisper ASR · pyannote.audio Diarization · Google Gemini · Streamlit
 
 ---
 
@@ -66,7 +66,7 @@ source venv/bin/activate
 pip install streamlit google-generativeai python-dotenv numpy soundfile
 ```
 
-> **Note:** In mock mode, you do NOT need PyAudio or nemo_toolkit.
+> **Note:** In mock mode, you do NOT need PyAudio or GPU-accelerated STT packages.
 
 ### Step 4: Configure Environment
 
@@ -119,13 +119,11 @@ Verify GPU access:
 python -c "import torch; print(torch.cuda.is_available()); print(torch.cuda.get_device_name(0))"
 ```
 
-### Step 3: Install NeMo Toolkit
+### Step 3: Install STT dependencies (faster-whisper, pyannote)
 
 ```bash
-pip install nemo_toolkit[asr]
+pip install faster-whisper pyannote.audio webrtcvad torchaudio
 ```
-
-> **Note:** NeMo has many dependencies. If you encounter conflicts, consider using a fresh virtual environment or a conda environment.
 
 ### Step 4: Install PortAudio (Required for PyAudio)
 
@@ -166,10 +164,11 @@ pip install -r requirements.txt
 
 ### Step 6: Get API Keys
 
-#### NVIDIA NGC API Key
-1. Create an account at [ngc.nvidia.com](https://ngc.nvidia.com/)
-2. Go to **Setup** → **API Key**
-3. Generate and copy your key
+#### Hugging Face Token (for Pyannote)
+1. Create an account at [huggingface.co](https://huggingface.co/)
+2. Go to **Settings** → **Access Tokens**
+3. Generate and copy your token
+4. Make sure you accept the user conditions for `pyannote/speaker-diarization-3.1` on HF.
 
 #### Google Gemini API Key
 1. Go to [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)
@@ -182,7 +181,7 @@ Edit your `.env` file:
 
 ```env
 GEMINI_API_KEY=your_actual_gemini_key
-NVIDIA_NGC_API_KEY=your_actual_ngc_key
+HF_TOKEN=your_actual_hf_token
 LOCAL_STT_MODEL_PATH=
 
 # Disable mock modes for production use
@@ -193,8 +192,8 @@ USE_MOCK_GEMINI=false
 
 ### Step 8: First Run (Model Download)
 
-On the first run with GPU mode, NeMo will download the Parakeet and Sortformer models from NGC. This requires:
-- A valid NGC API key
+On the first run with GPU mode, the app will download `faster-whisper` and `pyannote.audio` models. This requires:
+- A valid Hugging Face Token (with access to Pyannote models)
 - ~4 GB of disk space for model weights
 - ~5-10 minutes depending on connection speed
 
@@ -211,8 +210,8 @@ streamlit run app.py
 | Variable              | Description                                    | Default  |
 |-----------------------|------------------------------------------------|----------|
 | `GEMINI_API_KEY`      | Google Gemini API key                          | —        |
-| `NVIDIA_NGC_API_KEY`  | NVIDIA NGC API key for model downloads          | —        |
-| `LOCAL_STT_MODEL_PATH`| Path to a local `.nemo` checkpoint (optional)  | —        |
+| `HF_TOKEN`            | Hugging Face Token for Pyannote downloads       | —        |
+| `LOCAL_STT_MODEL_PATH`| Path to a local `.bin` checkpoint (optional)   | —        |
 | `USE_MOCK_AUDIO`      | Use simulated audio instead of microphone       | `true`   |
 | `USE_MOCK_NEMO`       | Use fake STT engine (no GPU needed)             | `true`   |
 | `USE_MOCK_GEMINI`     | Use canned Gemini responses (no API key needed) | `true`   |
@@ -284,20 +283,15 @@ pipwin install pyaudio
 
 Or download a `.whl` file from [Unofficial Windows Binaries](https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyaudio).
 
-### NeMo Import Errors
+### Import Errors
 
 ```
-ModuleNotFoundError: No module named 'nemo'
+ModuleNotFoundError: No module named 'faster_whisper'
 ```
 
-**Solution:** Ensure NeMo is installed with ASR extras:
+**Solution:** Ensure `faster-whisper` is installed:
 ```bash
-pip install nemo_toolkit[asr]
-```
-
-If conflicts occur, try installing from source:
-```bash
-pip install git+https://github.com/NVIDIA/NeMo.git@main#egg=nemo_toolkit[asr]
+pip install faster-whisper
 ```
 
 ### CUDA Out of Memory

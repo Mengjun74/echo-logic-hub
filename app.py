@@ -30,7 +30,7 @@ logger = logging.getLogger("echo-logic-hub")
 
 # ── Local imports ─────────────────────────────────────────────
 from audio_capture import create_audio_source
-from nemo_engine import create_stt_engine, TranscriptSegment
+from stt_engine import TranscriptionManager, TranscriptSegment
 from gemini_client import create_gemini_client
 
 
@@ -114,40 +114,15 @@ def start_streaming():
         return
 
     audio_src = create_audio_source()
-    stt_eng = create_stt_engine()
-    aq = queue.Queue(maxsize=300)
+    stt_eng = TranscriptionManager()
     rq = queue.Queue(maxsize=200)
-    stop_evt = threading.Event()
 
-    # Audio capture thread: reads from mic/mock → pushes to audio_queue
-    def audio_loop():
-        audio_src.start()
-        while not stop_evt.is_set():
-            chunk = audio_src.get_chunk(timeout=0.5)
-            if chunk is not None:
-                try:
-                    aq.put(chunk, timeout=0.3)
-                except queue.Full:
-                    pass
-        audio_src.stop()
-
-    # STT processing thread: reads audio_queue → pushes TranscriptSegments
-    def stt_loop():
-        stt_eng.process_stream(aq, rq, stop_evt)
-
-    audio_thread = threading.Thread(target=audio_loop, name="AudioCapture", daemon=True)
-    proc_thread = threading.Thread(target=stt_loop, name="STTProcessing", daemon=True)
-
-    audio_thread.start()
-    proc_thread.start()
+    # stt_eng handles the internal thread reading from audio_src
+    stt_eng.start_stream(audio_src, rq)
 
     st.session_state.audio_source = audio_src
     st.session_state.stt_engine = stt_eng
-    st.session_state.audio_queue = aq
     st.session_state.result_queue = rq
-    st.session_state.stop_event = stop_evt
-    st.session_state.audio_thread_ref = audio_thread
-    st.session_state.processing_thread = proc_thread
     st.session_state.is_streaming = True
 
     logger.info("▶️ Streaming started.")
@@ -158,25 +133,13 @@ def stop_streaming():
     if not st.session_state.is_streaming:
         return
 
-    if st.session_state.stop_event:
-        st.session_state.stop_event.set()
-
-    # Wait briefly for threads to finish
-    for t in [st.session_state.audio_thread_ref, st.session_state.processing_thread]:
-        if t is not None and t.is_alive():
-            t.join(timeout=3.0)
-
     if st.session_state.stt_engine:
-        st.session_state.stt_engine.shutdown()
+        st.session_state.stt_engine.stop_stream()
 
     st.session_state.is_streaming = False
     st.session_state.audio_source = None
     st.session_state.stt_engine = None
-    st.session_state.audio_queue = None
     st.session_state.result_queue = None
-    st.session_state.stop_event = None
-    st.session_state.audio_thread_ref = None
-    st.session_state.processing_thread = None
 
     logger.info("⏹️ Streaming stopped.")
 
