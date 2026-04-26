@@ -38,7 +38,7 @@
 
 ## 2. Quick Start (Mock Mode)
 
-Mock mode lets you test the full UI without a GPU, NeMo installation, microphone, or API keys.
+Mock mode lets you test the full UI without a GPU, STT model installation, microphone, or API keys.
 
 ### Step 1: Clone / Navigate to the Project
 
@@ -210,7 +210,7 @@ streamlit run app.py
 | Variable              | Description                                    | Default  |
 |-----------------------|------------------------------------------------|----------|
 | `GEMINI_API_KEY`      | Google Gemini API key                          | —        |
-| `HF_TOKEN`            | Hugging Face Token for Pyannote downloads       | —        |
+| `HF_TOKEN`            | Hugging Face token for Pyannote downloads       | —        |
 | `LOCAL_STT_MODEL_PATH`| Path to a local `.bin` checkpoint (optional)   | —        |
 | `USE_MOCK_AUDIO`      | Use simulated audio instead of microphone       | `true`   |
 | `USE_MOCK_NEMO`       | Use fake STT engine (no GPU needed)             | `true`   |

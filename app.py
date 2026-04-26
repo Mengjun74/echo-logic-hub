@@ -6,11 +6,9 @@ Run with: streamlit run app.py
 """
 
 import os
-import sys
 import time
 import queue
 import logging
-import threading
 from datetime import datetime
 from pathlib import Path
 
@@ -86,6 +84,7 @@ DEFAULTS = {
     "stop_event": None,
     "processing_thread": None,
     "audio_thread_ref": None,
+    "last_error": None,
 }
 
 for key, default in DEFAULTS.items():
@@ -113,19 +112,27 @@ def start_streaming():
     if st.session_state.is_streaming:
         return
 
-    audio_src = create_audio_source()
-    stt_eng = TranscriptionManager()
-    rq = queue.Queue(maxsize=200)
+    try:
+        audio_src = create_audio_source()
+        stt_eng = TranscriptionManager()
+        rq = queue.Queue(maxsize=200)
 
-    # stt_eng handles the internal thread reading from audio_src
-    stt_eng.start_stream(audio_src, rq)
+        stt_eng.start_stream(audio_src, rq)
 
-    st.session_state.audio_source = audio_src
-    st.session_state.stt_engine = stt_eng
-    st.session_state.result_queue = rq
-    st.session_state.is_streaming = True
+        st.session_state.audio_source = audio_src
+        st.session_state.stt_engine = stt_eng
+        st.session_state.result_queue = rq
+        st.session_state.is_streaming = True
+        st.session_state.last_error = None
 
-    logger.info("▶️ Streaming started.")
+        logger.info("▶️ Streaming started.")
+    except Exception as exc:
+        logger.exception("Failed to start streaming")
+        st.session_state.last_error = f"Failed to start streaming: {exc}"
+        st.session_state.audio_source = None
+        st.session_state.stt_engine = None
+        st.session_state.result_queue = None
+        st.session_state.is_streaming = False
 
 
 def stop_streaming():
@@ -166,6 +173,7 @@ def clear_session():
     st.session_state.transcript_segments = []
     st.session_state.selected_segment_ids = set()
     st.session_state.chat_history = []
+    st.session_state.last_error = None
     # Clear checkbox states
     for key in list(st.session_state.keys()):
         if key.startswith("cb_"):
@@ -266,6 +274,10 @@ with st.sidebar:
 
     st.markdown("---")
 
+    if st.session_state.last_error:
+        st.error(st.session_state.last_error)
+        st.markdown("---")
+
     # ── Mode Indicators ───────────────────────────────────────
     mock_audio = os.getenv("USE_MOCK_AUDIO", "true").lower() == "true"
     mock_nemo = os.getenv("USE_MOCK_NEMO", "true").lower() == "true"
@@ -278,7 +290,7 @@ with st.sidebar:
             f"**Audio:** {'🟡 Mock' if mock_audio else '🟢 Live'}"
         )
         st.markdown(
-            f"**NeMo:** {'🟡 Mock' if mock_nemo else '🟢 GPU'}"
+            f"**STT:** {'🟡 Mock' if mock_nemo else '🟢 Live'}"
         )
     with col_b:
         st.markdown(
@@ -457,9 +469,15 @@ with right_col:
             for s in selected_segments
         ]
 
-        with st.spinner("✦ Gemini is thinking..."):
-            client = get_gemini_client()
-            response = client.execute(system_prompt, context_strings)
+        try:
+            with st.spinner("✦ Gemini is thinking..."):
+                client = get_gemini_client()
+                response = client.execute(system_prompt, context_strings)
+            st.session_state.last_error = None
+        except Exception as exc:
+            logger.exception("Gemini execution failed")
+            response = f"❌ Gemini execution failed: {exc}"
+            st.session_state.last_error = f"Gemini execution failed: {exc}"
 
         # Add to chat history
         st.session_state.chat_history.append({
